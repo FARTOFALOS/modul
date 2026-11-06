@@ -1,0 +1,9 @@
+private/
+evidence/
+build/
+*.dll
+*.exe
+*.pdb
+*.sqlite*
+*.log
+__pycache__/
