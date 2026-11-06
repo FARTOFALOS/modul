@@ -1,0 +1,6 @@
+{
+  "account": "Sim101", "instrument": "MNQ DEC26", "riskBudget": 300,
+  "roundTripCommission": 2, "autoProtectOnLoad": true,
+  "autoProfitTarget": false, "allowLiveOrders": false,
+  "executionMode": "screen", "apiTradingAuthorized": false
+}

@@ -1,0 +1,12 @@
+name: Module checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  risk-lifecycle:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pure risk and lifecycle tests (no terminal and no orders)
+        shell: powershell
+        run: ./tools/test.ps1

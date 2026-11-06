@@ -7,3 +7,4 @@ build/
 *.sqlite*
 *.log
 __pycache__/
+.local/
