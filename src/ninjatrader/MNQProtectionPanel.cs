@@ -124,6 +124,7 @@ namespace NinjaTrader.NinjaScript.Indicators
    {
     if(selector==null)selector=Find(Window.GetWindow(ChartControl),"ChartTraderControlAccountSelector") as AccountSelector;
     Bind(selector==null?null:selector.SelectedAccount);ReadPosition();
+    if(qty==0&&cursorText!=null)cursorText.Text="";
     if(startupPending&&selected!=null&&Connected()&&Instrument.MasterInstrument.Name=="MNQ"&&(selected.Name.IndexOf("OUP",StringComparison.OrdinalIgnoreCase)>=0||selected.Name=="Sim101")&&(AllowLiveOrders||selected.Name=="Sim101"))
     {
      if(qty==0&&Acquire()){automatic=true;startupPending=false;message="Автостоп вооружён для новых позиций: общий риск $"+RiskBudget+" с комиссией.";}
@@ -136,14 +137,14 @@ namespace NinjaTrader.NinjaScript.Indicators
     double cash=selected.Get(AccountItem.CashValue,Currency.UsDollar);
     double grossRealized=selected.Get(AccountItem.GrossRealizedProfitLoss,Currency.UsDollar);
     UpdateExecutionMarks();
-    string connection=Connected()?"подключён":"НЕТ СОЕДИНЕНИЯ";
+    string connection=Connected()?(selected.Connection.PriceStatus==ConnectionStatus.Connected?"подключён":"НЕТ ПОТОКА КОТИРОВОК"):"НЕТ СОЕДИНЕНИЯ";
     bool evaluation=selected.Name.IndexOf("OUP",StringComparison.OrdinalIgnoreCase)>=0;
     double fees=evaluation?SessionFees():0;
     double netDay=RiskMath.NetDayResult(grossRealized,fees,fees>0);
     // This Evaluation feed's CashValue/GrossRealizedProfitLoss exclude current-day
     // commissions. Prior settled days are already in CashValue. Never subtract them again.
     // No unrealized PnL or projected exit fee is included: only actually filled sides.
-    summary.Text=selected.Name+" · "+connection+" · v11.06-S300-F1\n"+
+    summary.Text=selected.Name+" · "+connection+" · v11.06-S300-F2\n"+
      (evaluation?"Баланс с комиссией: "+Money(RiskMath.NetSessionCash(cash,fees),AccountItem.CashValue)+
       "\nСегодня чистыми: "+(double.IsNaN(netDay)||double.IsInfinity(netDay)?"нет данных":netDay.ToString("+$0.00;-$0.00;$0.00")):
       "Баланс / день с комиссией: только OneUp Evaluation");
@@ -350,7 +351,7 @@ namespace NinjaTrader.NinjaScript.Indicators
     foreach(var x in orders)exitGate.SentCancel(x);
     closing=orders.Length>0;if(orders.Length>0)selected.Cancel(orders);
     if(!candidates.Any(Live)){stop=target=null;group="";managedDirection=0;companionTakes.Clear();hasStop=hasTarget=false;}
-    manualTracking=false;message="Позиция закрыта. Ожидается завершение исполнений/OCO; повторные отмены не отправляются.";return;
+    manualTracking=false;message=candidates.Any(Live)?"Позиция закрыта. Ожидается завершение исполнений/OCO; повторные отмены не отправляются.":"Позиция закрыта. Защитных заявок нет.";return;
    }
    // After a confirmed scale-out the filled leg may be smaller than the remaining account position.
    // Never reuse it or its OCO id. The 300 ms execution/position settling fence above runs first.
